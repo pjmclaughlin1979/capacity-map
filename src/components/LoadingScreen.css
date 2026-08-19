@@ -1,0 +1,68 @@
+.loading-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: radial-gradient(circle at 50% 40%, #f4f6f8, #e4e9ec);
+  text-align: center;
+  padding: 24px;
+}
+
+.loading-screen__mark {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+}
+
+.loading-screen__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid #d7dde2;
+  border-top-color: #0c2b4e;
+  animation: spin 0.9s linear infinite;
+}
+
+.loading-screen__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0c2b4e;
+}
+
+.loading-screen__brand {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #0c2b4e;
+}
+
+.loading-screen__message {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #4a5560;
+  max-width: 320px;
+}
+
+.loading-screen__message--error {
+  color: #b3261e;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-screen__ring {
+    animation: none;
+  }
+}

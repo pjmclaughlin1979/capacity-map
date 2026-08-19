@@ -1,0 +1,77 @@
+.filter-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-start;
+  padding: 0.75rem 1.25rem;
+  background: #f4f6f8;
+  border-bottom: 1px solid #d7dde2;
+  font-size: 0.85rem;
+}
+
+.filter-panel__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.filter-panel__group--actions {
+  flex-direction: row;
+  align-items: center;
+  margin-left: auto;
+  gap: 0.75rem;
+}
+
+.filter-panel__label {
+  font-weight: 600;
+  color: #33414d;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+}
+
+.filter-panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid #c4ccd2;
+  background: #fff;
+  color: #4a5560;
+  font-size: 0.8rem;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.chip--active {
+  opacity: 1;
+  border-color: #0c2b4e;
+  color: #0c2b4e;
+  font-weight: 600;
+}
+
+.chip__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.filter-panel__link {
+  background: none;
+  border: none;
+  color: #0c2b4e;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+}
