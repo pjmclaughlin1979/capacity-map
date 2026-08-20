@@ -303,6 +303,12 @@ export function useCapacityMap(mapElementRef, filters) {
         const view = mapEl.view;
         viewRef.current = view;
 
+        // Default dock position is "auto", which resolves to top-right on
+        // wide views — the same corner as the search widget, so a manually
+        // docked/maximized popup lands underneath it and its close button
+        // becomes unreachable. Bottom-right has no other UI in it.
+        view.popup.dockOptions = { ...view.popup.dockOptions, position: "bottom-right" };
+
         layer = new GraphicsLayer({ title: "Substation Capacity" });
         view.map.add(layer);
 

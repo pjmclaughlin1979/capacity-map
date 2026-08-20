@@ -2,6 +2,9 @@ import { useMemo, useRef, useState } from "react";
 import "@arcgis/map-components/components/arcgis-map";
 import "@arcgis/map-components/components/arcgis-zoom";
 import "@arcgis/map-components/components/arcgis-search";
+import "@arcgis/map-components/components/arcgis-fullscreen";
+import "@arcgis/map-components/components/arcgis-expand";
+import "@arcgis/map-components/components/arcgis-basemap-gallery";
 import { useCapacityMap } from "./hooks/useCapacityMap.js";
 import { CAPACITY_LEVELS, CAPACITY_MODES, SUBSTATION_TYPES } from "./config/capacityConfig.js";
 import FilterPanel from "./components/FilterPanel.jsx";
@@ -65,6 +68,10 @@ export default function App() {
         <arcgis-map ref={mapElementRef} basemap="topo-vector">
           <arcgis-zoom slot="top-left" />
           <arcgis-search slot="top-right" />
+          <arcgis-fullscreen slot="top-right" />
+          <arcgis-expand slot="bottom-left">
+            <arcgis-basemap-gallery />
+          </arcgis-expand>
         </arcgis-map>
 
         {status !== "ready" && <LoadingScreen status={status} error={error} />}
