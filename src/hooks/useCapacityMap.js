@@ -186,7 +186,7 @@ function popupTemplateForPin(pin) {
 // All pins render at one fixed size — the label's own multiplier (see
 // pinSymbols.js) already gives two-letter labels ("BP"/"PP") extra room
 // relative to one-letter ones, so a single size works for every kind.
-const PIN_SIZE = 16;
+const PIN_SIZE = 22;
 function sizeForPin() {
   return PIN_SIZE;
 }

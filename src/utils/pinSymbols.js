@@ -16,16 +16,31 @@ function arcPoints(radius, fromDeg, toDeg, segments = 24) {
   return points;
 }
 
-function halfDiscRing(radius, side) {
-  // "right" bulges toward +x through 0deg; "left" bulges toward -x through 180deg.
-  // Each ring's straight closing edge is the vertical diameter (x = 0).
-  const ring = side === "right" ? arcPoints(radius, -90, 90) : arcPoints(radius, 90, 270);
-  return [...ring, ring[0]];
+const RADIUS = 5;
+
+// Tip extends this far below the head's center; a longer tip relative to
+// the head radius gives a sharper point (classic "map pin" silhouette).
+const TIP_LENGTH = RADIUS * 1.6;
+const TANGENT_ANGLE_DEG = (Math.acos(RADIUS / TIP_LENGTH) * 180) / Math.PI;
+const RIGHT_TANGENT_DEG = -90 + TANGENT_ANGLE_DEG;
+const LEFT_TANGENT_DEG = 270 - TANGENT_ANGLE_DEG;
+
+// A "map pin" outline: a circular head with a pointed tail hanging straight
+// down from its center, formed by the two lines tangent to the head circle
+// from the tip point. halfRing splits it along the same vertical centerline
+// the tip already sits on, so left/right halves meet cleanly at the tip.
+function teardropHalfRing(radius, side) {
+  const tip = [0, -TIP_LENGTH];
+  const arc =
+    side === "right"
+      ? arcPoints(radius, RIGHT_TANGENT_DEG, 90, 16)
+      : arcPoints(radius, 90, LEFT_TANGENT_DEG, 16);
+  return [...arc, tip, arc[0]];
 }
 
-function fullDiscRing(radius) {
-  const ring = arcPoints(radius, -180, 180, 32);
-  return [...ring, ring[0]];
+function teardropRing(radius) {
+  const arc = arcPoints(radius, RIGHT_TANGENT_DEG, LEFT_TANGENT_DEG, 32);
+  return [...arc, [0, -TIP_LENGTH], arc[0]];
 }
 
 function hexToRgba(hex, alpha = 255) {
@@ -75,8 +90,6 @@ function textMarkerGraphic(text, height, { color = "#ffffff", haloColor = "#1c25
   };
 }
 
-const RADIUS = 5;
-
 function cimPointSymbol(markerGraphics, size) {
   return {
     type: "cim",
@@ -89,7 +102,7 @@ function cimPointSymbol(markerGraphics, size) {
             type: "CIMVectorMarker",
             enable: true,
             size,
-            frame: { xmin: -RADIUS, ymin: -RADIUS, xmax: RADIUS, ymax: RADIUS },
+            frame: { xmin: -RADIUS, ymin: -TIP_LENGTH, xmax: RADIUS, ymax: RADIUS },
             markerGraphics,
           },
         ],
@@ -100,18 +113,18 @@ function cimPointSymbol(markerGraphics, size) {
 
 export function buildCircleSymbol({ color, size = 14, outlineColor = "#ffffff", label }) {
   const outlineRgba = hexToRgba(outlineColor);
-  const graphics = [fillMarkerGraphic(fullDiscRing(RADIUS), color, outlineRgba)];
-  if (label) graphics.push(textMarkerGraphic(label, RADIUS * 0.85));
+  const graphics = [fillMarkerGraphic(teardropRing(RADIUS), color, outlineRgba)];
+  if (label) graphics.push(textMarkerGraphic(label, RADIUS * 1.1));
   return cimPointSymbol(graphics, size);
 }
 
 export function buildSplitCircleSymbol({ leftColor, rightColor, size = 16, outlineColor = "#ffffff", label }) {
   const outlineRgba = hexToRgba(outlineColor);
   const graphics = [
-    fillMarkerGraphic(halfDiscRing(RADIUS, "left"), leftColor, outlineRgba),
-    fillMarkerGraphic(halfDiscRing(RADIUS, "right"), rightColor, outlineRgba),
+    fillMarkerGraphic(teardropHalfRing(RADIUS, "left"), leftColor, outlineRgba),
+    fillMarkerGraphic(teardropHalfRing(RADIUS, "right"), rightColor, outlineRgba),
   ];
   // Two-character labels ("BP"/"PP") need a touch more room than one.
-  if (label) graphics.push(textMarkerGraphic(label, RADIUS * (label.length > 1 ? 0.75 : 0.85)));
+  if (label) graphics.push(textMarkerGraphic(label, RADIUS * (label.length > 1 ? 0.95 : 1.1)));
   return cimPointSymbol(graphics, size);
 }
