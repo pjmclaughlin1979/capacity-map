@@ -84,8 +84,8 @@ export default function NieStyleApp() {
         <arcgis-map ref={mapElementRef} basemap="topo-vector">
           <arcgis-home slot="top-left" />
           <arcgis-zoom slot="top-left" />
+          <arcgis-fullscreen slot="top-left" />
           <arcgis-search slot="top-right" />
-          <arcgis-fullscreen slot="top-right" />
           <arcgis-expand slot="bottom-left">
             <arcgis-basemap-gallery />
           </arcgis-expand>

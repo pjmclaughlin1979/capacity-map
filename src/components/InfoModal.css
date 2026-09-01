@@ -69,7 +69,6 @@
 
 .key-legend__swatch {
   width: 14px;
-  height: 14px;
-  border-radius: 50%;
+  height: 19px;
   flex-shrink: 0;
 }

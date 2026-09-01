@@ -24,7 +24,14 @@ export default function KeyContent() {
       <h3>Pin colour</h3>
       {Object.values(CAPACITY_LEVELS).map((level) => (
         <div className="key-legend" key={level}>
-          <span className="key-legend__swatch" style={{ background: CAPACITY_COLORS[level] }} />
+          <svg className="key-legend__swatch" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 0C7.31 0 3.5 3.81 3.5 8.5c0 6.5 8.5 15.5 8.5 15.5s8.5-9 8.5-15.5C20.5 3.81 16.69 0 12 0z"
+              fill={CAPACITY_COLORS[level]}
+              stroke="#ffffff"
+              strokeWidth="1"
+            />
+          </svg>
           <span>{CAPACITY_LABELS[level]}</span>
         </div>
       ))}

@@ -178,6 +178,17 @@ function levelsForRow(s, axis) {
 function detailHeaderRowsForRow(s) {
   return `
     ${popupRow("Substation Type", s.substationType === "bulk" ? "Bulk Supply Point" : s.substationType === "combined" ? "Bulk + Primary (combined site)" : "Primary Substation")}
+    ${popupRow("Voltage Domain (Primary)", s.voltageDomainPri)}
+    ${popupRow("Voltage Domain (Bulk)", s.voltageDomainBsp)}
+    ${popupRow("Bulk Supply Point", s.bulkSupplyPoint)}
+  `;
+}
+
+// Side-panel-only header: Latitude/Longitude are shown here but not in the
+// compact popup — matching the source site (its popup omits them too).
+function detailHeaderWithLatLongHtml(s) {
+  return `
+    ${popupRow("Substation Type", s.substationType === "bulk" ? "Bulk Supply Point" : s.substationType === "combined" ? "Bulk + Primary (combined site)" : "Primary Substation")}
     ${popupRow("Latitude", s.latitude)}
     ${popupRow("Longitude", s.longitude)}
     ${popupRow("Voltage Domain (Primary)", s.voltageDomainPri)}
@@ -235,11 +246,11 @@ function bulkDetailSectionsHtml(s, levels) {
 }
 
 function detailHtmlForRow(s, axis) {
-  return `<div>${detailHeaderRowsForRow(s)}${detailSectionsHtml(s, levelsForRow(s, axis))}</div>`;
+  return `<div>${detailHeaderWithLatLongHtml(s)}${detailSectionsHtml(s, levelsForRow(s, axis))}</div>`;
 }
 
 function detailHtmlForBulkAxis(s) {
-  return `<div>${detailHeaderRowsForRow(s)}${bulkDetailSectionsHtml(s, levelsForRow(s, "bsp"))}</div>`;
+  return `<div>${detailHeaderWithLatLongHtml(s)}${bulkDetailSectionsHtml(s, levelsForRow(s, "bsp"))}</div>`;
 }
 
 function baseName(name) {
