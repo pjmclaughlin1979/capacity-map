@@ -14,6 +14,7 @@ import KeyContent from "./components/KeyContent.jsx";
 import FaqContent from "./components/FaqContent.jsx";
 import LoadingScreen from "./components/LoadingScreen.jsx";
 import DisclaimerModal from "./components/DisclaimerModal.jsx";
+import SidePanel from "./components/SidePanel.jsx";
 import "./App.css";
 
 export default function App() {
@@ -32,7 +33,10 @@ export default function App() {
     [mode, substationTypes, levels]
   );
 
-  const { status, error, usingSampleData } = useCapacityMap(mapElementRef, filters);
+  const { status, error, usingSampleData, sidePanel, closeSidePanel } = useCapacityMap(
+    mapElementRef,
+    filters
+  );
 
   function toggleType(type) {
     setSubstationTypes((prev) => {
@@ -86,6 +90,10 @@ export default function App() {
           <div className="app__sample-banner" role="status">
             Live feature service unreachable — showing bundled sample data.
           </div>
+        )}
+
+        {sidePanel && (
+          <SidePanel key={sidePanel.title} title={sidePanel.title} html={sidePanel.html} onClose={closeSidePanel} />
         )}
       </div>
 

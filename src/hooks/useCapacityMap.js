@@ -152,64 +152,176 @@ function summaryBlockHtml(s) {
   `;
 }
 
-function buildPopupHtml(s) {
+function sectionHeadingHtml(label, level) {
+  return `<h4 style="${H4_STYLE}display:flex;align-items:center;gap:0.4rem;"><span style="${SWATCH_STYLE}background:${CAPACITY_COLORS[level]};"></span>${label}</h4>`;
+}
+
+// RAG colour for each availability section's heading. For a plain pin (or
+// a dual-primary side), that's the same blended pri+bsp level shown in the
+// summary popup. For one axis of a combined pin, it's that axis's own RAG
+// alone — matching summaryRowForAxis and the pin's own split colouring.
+function levelsForRow(s, axis) {
+  if (!axis) {
+    return {
+      demand: levelForMode(s, CAPACITY_MODES.DEMAND),
+      generation: levelForMode(s, CAPACITY_MODES.GENERATION),
+      faultLevel: levelForMode(s, CAPACITY_MODES.FAULT_LEVEL),
+    };
+  }
+  return {
+    demand: ragToLevel(s.demand[axis].rag) ?? CAPACITY_LEVELS.UNAVAILABLE,
+    generation: ragToLevel(s.generation[axis].rag) ?? CAPACITY_LEVELS.UNAVAILABLE,
+    faultLevel: ragToLevel(s.faultLevel[axis].rag) ?? CAPACITY_LEVELS.UNAVAILABLE,
+  };
+}
+
+function detailHeaderRowsForRow(s) {
   return `
-    <div>
-      ${popupRow("Substation Type", s.substationType === "bulk" ? "Bulk Supply Point" : s.substationType === "combined" ? "Bulk + Primary (combined site)" : "Primary Substation")}
-      ${popupRow("Voltage Domain (Primary)", s.voltageDomainPri)}
-      ${popupRow("Voltage Domain (Bulk)", s.voltageDomainBsp)}
-      ${popupRow("Bulk Supply Point", s.bulkSupplyPoint)}
-
-      <div style="${SUMMARY_STYLE}">
-        ${summaryBlockHtml(s)}
-      </div>
-
-      <h4 style="${H4_STYLE}">Demand Availability</h4>
-      ${popupRow("Transformer Headroom", fmtMva(s.demand.pri.headroom))}
-      ${popupRow("Upstream Headroom (Distribution)", fmtMva(s.demand.net.headroom))}
-      ${popupRow("Upstream Headroom (BSP)", fmtMva(s.demand.bsp.headroom))}
-      ${s.demand.comment ? `<p>${s.demand.comment}</p>` : ""}
-
-      <h4 style="${H4_STYLE}">Generation Availability</h4>
-      ${popupRow("Substation Generation Capacity", fmtMva(s.generation.pri.capacity))}
-      ${popupRow("Connected Generation", fmtMva(s.generation.pri.connected ?? s.generation.bsp.connected))}
-      ${popupRow("Committed (Not Yet Connected)", fmtMva(s.generation.pri.committed ?? s.generation.bsp.committed))}
-      ${popupRow("Substation Generation Headroom", fmtMva(s.generation.pri.headroom))}
-      ${popupRow("Upstream Headroom (Distribution)", fmtMva(s.generation.net.headroom))}
-      ${popupRow("Upstream Headroom (BSP)", fmtMva(s.generation.bsp.headroom))}
-      ${s.generation.comment ? `<p>${s.generation.comment}</p>` : ""}
-
-      <h4 style="${H4_STYLE}">Fault Level Availability</h4>
-      ${popupRow("Substation Fault Headroom", fmtMva(s.faultLevel.pri.headroom))}
-      ${popupRow("Upstream Headroom (Distribution)", fmtMva(s.faultLevel.net.headroom))}
-      ${popupRow("Upstream Headroom (BSP)", fmtMva(s.faultLevel.bsp.headroom))}
-      ${s.faultLevel.comment ? `<p>${s.faultLevel.comment}</p>` : ""}
-      ${s.otherComment ? `<p>${s.otherComment}</p>` : ""}
-    </div>
+    ${popupRow("Substation Type", s.substationType === "bulk" ? "Bulk Supply Point" : s.substationType === "combined" ? "Bulk + Primary (combined site)" : "Primary Substation")}
+    ${popupRow("Latitude", s.latitude)}
+    ${popupRow("Longitude", s.longitude)}
+    ${popupRow("Voltage Domain (Primary)", s.voltageDomainPri)}
+    ${popupRow("Voltage Domain (Bulk)", s.voltageDomainBsp)}
+    ${popupRow("Bulk Supply Point", s.bulkSupplyPoint)}
   `;
+}
+
+// The full breakdown for one row, primary-axis-centric (transformer/network/
+// upstream-BSP) — used for single pins, each side of a dual-primary pin, and
+// the "Primary Substation" button of a combined pin.
+function detailSectionsHtml(s, levels) {
+  return `
+    ${sectionHeadingHtml("Demand Availability", levels.demand)}
+    ${popupRow("Transformer Headroom", fmtMva(s.demand.pri.headroom))}
+    ${popupRow("Upstream Headroom (Distribution)", fmtMva(s.demand.net.headroom))}
+    ${popupRow("Upstream Headroom (BSP)", fmtMva(s.demand.bsp.headroom))}
+    ${s.demand.comment ? `<p>${s.demand.comment}</p>` : ""}
+
+    ${sectionHeadingHtml("Generation Availability", levels.generation)}
+    ${popupRow("Substation Generation Capacity", fmtMva(s.generation.pri.capacity))}
+    ${popupRow("Connected Generation", fmtMva(s.generation.pri.connected ?? s.generation.bsp.connected))}
+    ${popupRow("Committed (Not Yet Connected)", fmtMva(s.generation.pri.committed ?? s.generation.bsp.committed))}
+    ${popupRow("Substation Generation Headroom", fmtMva(s.generation.pri.headroom))}
+    ${popupRow("Upstream Headroom (Distribution)", fmtMva(s.generation.net.headroom))}
+    ${popupRow("Upstream Headroom (BSP)", fmtMva(s.generation.bsp.headroom))}
+    ${s.generation.comment ? `<p>${s.generation.comment}</p>` : ""}
+
+    ${sectionHeadingHtml("Fault Level Availability", levels.faultLevel)}
+    ${popupRow("Substation Fault Headroom", fmtMva(s.faultLevel.pri.headroom))}
+    ${popupRow("Upstream Headroom (Distribution)", fmtMva(s.faultLevel.net.headroom))}
+    ${popupRow("Upstream Headroom (BSP)", fmtMva(s.faultLevel.bsp.headroom))}
+    ${s.faultLevel.comment ? `<p>${s.faultLevel.comment}</p>` : ""}
+    ${s.otherComment ? `<p>${s.otherComment}</p>` : ""}
+  `;
+}
+
+// The Bulk Supply Point half of a combined site, on its own axis only —
+// matches what a standalone "bulk" substation's own detail would show,
+// rather than repeating the primary-side transformer/network figures.
+function bulkDetailSectionsHtml(s, levels) {
+  return `
+    ${sectionHeadingHtml("Demand Availability", levels.demand)}
+    ${popupRow("Bulk Supply Point Headroom", fmtMva(s.demand.bsp.headroom))}
+
+    ${sectionHeadingHtml("Generation Availability", levels.generation)}
+    ${popupRow("Bulk Supply Point Generation Capacity", fmtMva(s.generation.bsp.capacity))}
+    ${popupRow("Connected Generation", fmtMva(s.generation.bsp.connected))}
+    ${popupRow("Committed (Not Yet Connected)", fmtMva(s.generation.bsp.committed))}
+    ${popupRow("Bulk Supply Point Generation Headroom", fmtMva(s.generation.bsp.headroom))}
+
+    ${sectionHeadingHtml("Fault Level Availability", levels.faultLevel)}
+    ${popupRow("Bulk Supply Point Fault Headroom", fmtMva(s.faultLevel.bsp.headroom))}
+  `;
+}
+
+function detailHtmlForRow(s, axis) {
+  return `<div>${detailHeaderRowsForRow(s)}${detailSectionsHtml(s, levelsForRow(s, axis))}</div>`;
+}
+
+function detailHtmlForBulkAxis(s) {
+  return `<div>${detailHeaderRowsForRow(s)}${bulkDetailSectionsHtml(s, levelsForRow(s, "bsp"))}</div>`;
 }
 
 function baseName(name) {
   return name.replace(/\s*\[[^\]]*\]\s*$/, "");
 }
 
-function buildDualPopupHtml(left, right) {
+// The map popup itself only ever shows a compact summary plus a "Show
+// Information" action (or two, for a split pin) — matching the source
+// map's own pattern of a minimal popup that hands off to a side panel for
+// the full breakdown, rather than cramming everything into the popup.
+function minimalPopupHtml(pin) {
+  if (pin.kind === "dualPrimary") {
+    const { left, right } = pin;
+    const leftLabel = left.voltageDomainPri || "Primary";
+    const rightLabel = right.voltageDomainPri || "Primary";
+    return `
+      <div>
+        ${popupRow("Substation Type", "Dual Primary Substation")}
+        ${popupRow("Voltage Domain 1", leftLabel)}
+        ${popupRow("Voltage Domain 2", rightLabel)}
+        ${popupRow("Bulk Supply Point", left.bulkSupplyPoint)}
+        <div style="${SUMMARY_STYLE}">
+          ${summaryRow(`Available Demand Headroom (${leftLabel})`, CAPACITY_MODES.DEMAND, left)}
+          ${summaryRow(`Available Demand Headroom (${rightLabel})`, CAPACITY_MODES.DEMAND, right)}
+          ${summaryRow(`Available Generation Headroom (${leftLabel})`, CAPACITY_MODES.GENERATION, left)}
+          ${summaryRow(`Available Generation Headroom (${rightLabel})`, CAPACITY_MODES.GENERATION, right)}
+          ${summaryRow(`Available Fault Level Headroom (${leftLabel})`, CAPACITY_MODES.FAULT_LEVEL, left)}
+          ${summaryRow(`Available Fault Level Headroom (${rightLabel})`, CAPACITY_MODES.FAULT_LEVEL, right)}
+        </div>
+      </div>
+    `;
+  }
+
+  const s = pin.substation;
   return `
     <div>
-      <h4 style="${H4_STYLE}">${left.voltageDomainPri || "Primary"}</h4>
-      ${buildPopupHtml(left)}
-      <hr />
-      <h4 style="${H4_STYLE}">${right.voltageDomainPri || "Primary"}</h4>
-      ${buildPopupHtml(right)}
+      ${detailHeaderRowsForRow(s)}
+      <div style="${SUMMARY_STYLE}">${summaryBlockHtml(s)}</div>
     </div>
   `;
 }
 
-function popupTemplateForPin(pin) {
-  if (pin.kind === "dualPrimary") {
-    return { title: baseName(pin.left.name), content: buildDualPopupHtml(pin.left, pin.right) };
+// One "Show Information" action per axis: a single button for a plain
+// bulk-only or primary-only pin, two for a split (combined or
+// dual-primary) pin. The pin id + axis key are encoded into the action id
+// so the trigger-action handler can look up which detail view to show.
+function actionsForPin(pin) {
+  if (pin.kind === "combined") {
+    return [
+      { id: `showinfo|${pin.id}|bsp`, title: "Show Information - Bulk Supply Point" },
+      { id: `showinfo|${pin.id}|pri`, title: "Show Information - Primary Substation" },
+    ];
   }
-  return { title: pin.substation.name, content: buildPopupHtml(pin.substation) };
+  if (pin.kind === "dualPrimary") {
+    return [
+      { id: `showinfo|${pin.id}|left`, title: `Show Information - ${pin.left.voltageDomainPri || "Primary"}` },
+      { id: `showinfo|${pin.id}|right`, title: `Show Information - ${pin.right.voltageDomainPri || "Primary"}` },
+    ];
+  }
+  return [{ id: `showinfo|${pin.id}|_`, title: "Show Information" }];
+}
+
+function popupTemplateForPin(pin) {
+  const title = pin.kind === "dualPrimary" ? baseName(pin.left.name) : pin.substation.name;
+  return { title, content: minimalPopupHtml(pin), actions: actionsForPin(pin) };
+}
+
+// Resolves a "Show Information" action back to the side-panel title + HTML
+// for the specific axis that was clicked.
+function sidePanelContentForAction(pin, axisKey) {
+  if (pin.kind === "combined") {
+    const s = pin.substation;
+    return axisKey === "bsp"
+      ? { title: `${baseName(s.name)} — Bulk Supply Point`, html: detailHtmlForBulkAxis(s) }
+      : { title: `${baseName(s.name)} — Primary Substation`, html: detailHtmlForRow(s, "pri") };
+  }
+  if (pin.kind === "dualPrimary") {
+    const row = axisKey === "left" ? pin.left : pin.right;
+    return { title: `${baseName(row.name)} — ${row.voltageDomainPri || "Primary"}`, html: detailHtmlForRow(row) };
+  }
+  const s = pin.substation;
+  return { title: s.name, html: detailHtmlForRow(s) };
 }
 
 // All pins render at one fixed size — the label's own multiplier (see
@@ -296,8 +408,10 @@ export function useCapacityMap(mapElementRef, filters) {
   const [status, setStatus] = useState("loading"); // "loading" | "ready" | "error"
   const [error, setError] = useState(null);
   const [usingSampleData, setUsingSampleData] = useState(false);
+  const [sidePanel, setSidePanel] = useState(null); // { title, html } | null
   const viewRef = useRef(null);
   const graphicsRef = useRef([]); // [{ graphic, pin }]
+  const pinsByIdRef = useRef(new Map());
 
   // Bootstrap the view + graphics layer once.
   useEffect(() => {
@@ -306,6 +420,7 @@ export function useCapacityMap(mapElementRef, filters) {
 
     let cancelled = false;
     let layer = null;
+    let handleTriggerAction = null;
     const abortController = new AbortController();
 
     async function handleReady() {
@@ -338,10 +453,33 @@ export function useCapacityMap(mapElementRef, filters) {
         // becomes unreachable. Bottom-right has no other UI in it.
         view.popup.dockOptions = { ...view.popup.dockOptions, position: "bottom-right" };
 
+        // view.popup here is a plain reactive snapshot (no .on()/.viewModel),
+        // and the default popup's action buttons render as <calcite-action>
+        // elements with no component-level "trigger action" event exposed —
+        // so a plain (shadow-DOM-crossing) click listener reading the
+        // clicked action's data-action-id is the reliable way to hear about
+        // them. The popup itself only ever shows a compact summary; its
+        // "Show Information" action(s) (see actionsForPin) hand off to the
+        // side panel for the full breakdown, matching the source map's own
+        // popup-then-panel pattern.
+        handleTriggerAction = (event) => {
+          const actionEl = event
+            .composedPath()
+            .find((el) => el.tagName === "CALCITE-ACTION" && el.dataset?.actionId);
+          if (!actionEl) return;
+          const [kind, pinId, axisKey] = actionEl.dataset.actionId.split("|");
+          if (kind !== "showinfo") return;
+          const pin = pinsByIdRef.current.get(pinId);
+          if (!pin) return;
+          setSidePanel(sidePanelContentForAction(pin, axisKey));
+        };
+        mapEl.addEventListener("click", handleTriggerAction);
+
         layer = new GraphicsLayer({ title: "Substation Capacity" });
         view.map.add(layer);
 
         const pins = groupIntoPins(substations);
+        pinsByIdRef.current = new Map(pins.map((pin) => [pin.id, pin]));
 
         graphicsRef.current = pins.map((pin) => {
           const graphic = new Graphic({
@@ -377,6 +515,7 @@ export function useCapacityMap(mapElementRef, filters) {
       cancelled = true;
       abortController.abort();
       mapEl.removeEventListener("arcgisViewReadyChange", handleReady);
+      if (handleTriggerAction) mapEl.removeEventListener("click", handleTriggerAction);
       layer?.destroy();
       viewRef.current = null;
     };
@@ -395,5 +534,12 @@ export function useCapacityMap(mapElementRef, filters) {
     }
   }, [status, filters.mode, filters.substationTypes, filters.levels]);
 
-  return { status, error, usingSampleData, viewRef };
+  return {
+    status,
+    error,
+    usingSampleData,
+    viewRef,
+    sidePanel,
+    closeSidePanel: () => setSidePanel(null),
+  };
 }
