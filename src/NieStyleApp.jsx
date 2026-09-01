@@ -13,9 +13,11 @@ import KeyContent from "./components/KeyContent.jsx";
 import FaqContent from "./components/FaqContent.jsx";
 import LoadingScreen from "./components/LoadingScreen.jsx";
 import DisclaimerModal from "./components/DisclaimerModal.jsx";
+import NieHeader from "./components/NieHeader.jsx";
+import NieFooter from "./components/NieFooter.jsx";
 import "./App.css";
 
-export default function App() {
+export default function NieStyleApp() {
   const mapElementRef = useRef(null);
 
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
@@ -51,12 +53,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="app__header">
-        <h1>Network Capacity Map</h1>
-        <a className="app__style-link" href="./niestyle.html">
-          NIE-style layout
-        </a>
-      </header>
+      <NieHeader onOpenKey={() => setOpenModal("key")} onOpenFaq={() => setOpenModal("faq")} />
 
       <FilterPanel
         mode={mode}
@@ -65,8 +62,7 @@ export default function App() {
         onToggleType={toggleType}
         levels={levels}
         onToggleLevel={toggleLevel}
-        onOpenKey={() => setOpenModal("key")}
-        onOpenFaq={() => setOpenModal("faq")}
+        showActions={false}
       />
 
       <div className="app__map-container">
@@ -86,6 +82,8 @@ export default function App() {
           </div>
         )}
       </div>
+
+      <NieFooter onOpenKey={() => setOpenModal("key")} onOpenFaq={() => setOpenModal("faq")} />
 
       <InfoModal title="Key" isOpen={openModal === "key"} onClose={() => setOpenModal(null)}>
         <KeyContent />

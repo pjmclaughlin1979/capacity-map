@@ -18,6 +18,7 @@ export default function FilterPanel({
   onToggleLevel,
   onOpenKey,
   onOpenFaq,
+  showActions = true,
 }) {
   return (
     <div className="filter-panel">
@@ -73,14 +74,16 @@ export default function FilterPanel({
         </div>
       </div>
 
-      <div className="filter-panel__group filter-panel__group--actions">
-        <button type="button" className="filter-panel__link" onClick={onOpenKey}>
-          Key
-        </button>
-        <button type="button" className="filter-panel__link" onClick={onOpenFaq}>
-          FAQs
-        </button>
-      </div>
+      {showActions && (
+        <div className="filter-panel__group filter-panel__group--actions">
+          <button type="button" className="filter-panel__link" onClick={onOpenKey}>
+            Key
+          </button>
+          <button type="button" className="filter-panel__link" onClick={onOpenFaq}>
+            FAQs
+          </button>
+        </div>
+      )}
     </div>
   );
 }
