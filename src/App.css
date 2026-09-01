@@ -56,6 +56,30 @@ arcgis-map {
   opacity: 0;
 }
 
+/* The niestyle header/footer are much taller than the classic layout's,
+   so on short mobile viewports the flex-shared space they leave the map
+   can shrink to near nothing. Keep .app at a *definite* height (100%) —
+   ArcGIS's view suspends itself if it ever measures a 0-height container,
+   which an "auto" height ancestor can briefly cause during layout, and it
+   doesn't reliably recover — and let it scroll internally instead, with
+   the map given a floor height it can't shrink past. */
+@media (max-width: 640px) {
+  .app--niestyle {
+    overflow-y: auto;
+  }
+
+  .app--niestyle .nie-header,
+  .app--niestyle .nie-filters-collapse,
+  .app--niestyle .nie-footer {
+    flex-shrink: 0;
+  }
+
+  .app--niestyle .app__map-container {
+    flex-shrink: 0;
+    min-height: 360px;
+  }
+}
+
 .app__sample-banner {
   position: absolute;
   bottom: 12px;

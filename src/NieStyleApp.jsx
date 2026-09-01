@@ -54,7 +54,7 @@ export default function NieStyleApp() {
   }
 
   return (
-    <div className="app">
+    <div className="app app--niestyle">
       <NieHeader
         onOpenKey={() => setOpenModal("key")}
         onOpenFaq={() => setOpenModal("faq")}
