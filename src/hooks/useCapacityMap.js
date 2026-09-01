@@ -121,6 +121,37 @@ function summaryRow(label, mode, s) {
   return `<dl style="${ROW_STYLE}"><dt style="${DT_STYLE}"><span style="${SWATCH_STYLE}background:${CAPACITY_COLORS[level]};"></span>${label}</dt><dd style="${DD_STYLE}">${value}</dd></dl>`;
 }
 
+// Combined (Bulk + Primary) sites render as a two-colour split pin — one
+// colour per axis (see sideLevelsForMode in symbolForPin) — so their popup
+// summary needs one headline per axis too. A single blended row (as used
+// for a plain bulk-only or primary-only pin) would hide which half is
+// actually the constraint, and its colour wouldn't match either half of
+// the pin that was just clicked.
+function summaryRowForAxis(label, mode, s, axis) {
+  const section = s[MODE_TO_SECTION[mode]];
+  const level = ragToLevel(section[axis].rag) ?? CAPACITY_LEVELS.UNAVAILABLE;
+  const value = fmtMva(section[axis].headroom) ?? "Contact for info";
+  return `<dl style="${ROW_STYLE}"><dt style="${DT_STYLE}"><span style="${SWATCH_STYLE}background:${CAPACITY_COLORS[level]};"></span>${label}</dt><dd style="${DD_STYLE}">${value}</dd></dl>`;
+}
+
+function summaryBlockHtml(s) {
+  if (s.substationType !== "combined") {
+    return `
+      ${summaryRow("Available Demand Headroom", CAPACITY_MODES.DEMAND, s)}
+      ${summaryRow("Available Generation Headroom", CAPACITY_MODES.GENERATION, s)}
+      ${summaryRow("Available Fault Level Headroom", CAPACITY_MODES.FAULT_LEVEL, s)}
+    `;
+  }
+  return `
+    ${summaryRowForAxis("Bulk Supply Point — Demand Headroom", CAPACITY_MODES.DEMAND, s, "bsp")}
+    ${summaryRowForAxis("Primary Substation — Demand Headroom", CAPACITY_MODES.DEMAND, s, "pri")}
+    ${summaryRowForAxis("Bulk Supply Point — Generation Headroom", CAPACITY_MODES.GENERATION, s, "bsp")}
+    ${summaryRowForAxis("Primary Substation — Generation Headroom", CAPACITY_MODES.GENERATION, s, "pri")}
+    ${summaryRowForAxis("Bulk Supply Point — Fault Level Headroom", CAPACITY_MODES.FAULT_LEVEL, s, "bsp")}
+    ${summaryRowForAxis("Primary Substation — Fault Level Headroom", CAPACITY_MODES.FAULT_LEVEL, s, "pri")}
+  `;
+}
+
 function buildPopupHtml(s) {
   return `
     <div>
@@ -130,9 +161,7 @@ function buildPopupHtml(s) {
       ${popupRow("Bulk Supply Point", s.bulkSupplyPoint)}
 
       <div style="${SUMMARY_STYLE}">
-        ${summaryRow("Available Demand Headroom", CAPACITY_MODES.DEMAND, s)}
-        ${summaryRow("Available Generation Headroom", CAPACITY_MODES.GENERATION, s)}
-        ${summaryRow("Available Fault Level Headroom", CAPACITY_MODES.FAULT_LEVEL, s)}
+        ${summaryBlockHtml(s)}
       </div>
 
       <h4 style="${H4_STYLE}">Demand Availability</h4>
