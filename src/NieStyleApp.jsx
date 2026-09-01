@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import "@arcgis/map-components/components/arcgis-map";
+import "@arcgis/map-components/components/arcgis-home";
 import "@arcgis/map-components/components/arcgis-zoom";
 import "@arcgis/map-components/components/arcgis-search";
 import "@arcgis/map-components/components/arcgis-fullscreen";
@@ -27,6 +28,7 @@ export default function NieStyleApp() {
   );
   const [levels, setLevels] = useState(() => new Set(Object.values(CAPACITY_LEVELS)));
   const [openModal, setOpenModal] = useState(null); // null | "key" | "faq"
+  const [filtersVisible, setFiltersVisible] = useState(true);
 
   const filters = useMemo(
     () => ({ mode, substationTypes, levels }),
@@ -53,20 +55,28 @@ export default function NieStyleApp() {
 
   return (
     <div className="app">
-      <NieHeader onOpenKey={() => setOpenModal("key")} onOpenFaq={() => setOpenModal("faq")} />
-
-      <FilterPanel
-        mode={mode}
-        onModeChange={setMode}
-        substationTypes={substationTypes}
-        onToggleType={toggleType}
-        levels={levels}
-        onToggleLevel={toggleLevel}
-        showActions={false}
+      <NieHeader
+        onOpenKey={() => setOpenModal("key")}
+        onOpenFaq={() => setOpenModal("faq")}
+        filtersVisible={filtersVisible}
+        onToggleFilters={() => setFiltersVisible((prev) => !prev)}
       />
+
+      {filtersVisible && (
+        <FilterPanel
+          mode={mode}
+          onModeChange={setMode}
+          substationTypes={substationTypes}
+          onToggleType={toggleType}
+          levels={levels}
+          onToggleLevel={toggleLevel}
+          showActions={false}
+        />
+      )}
 
       <div className="app__map-container">
         <arcgis-map ref={mapElementRef} basemap="topo-vector">
+          <arcgis-home slot="top-left" />
           <arcgis-zoom slot="top-left" />
           <arcgis-search slot="top-right" />
           <arcgis-fullscreen slot="top-right" />

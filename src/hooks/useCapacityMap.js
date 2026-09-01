@@ -327,6 +327,12 @@ export function useCapacityMap(mapElementRef, filters) {
         await view.goTo(new Extent(INITIAL_EXTENT));
         if (cancelled) return;
 
+        // The Home widget defaults to whatever viewpoint existed at the
+        // moment it was created, which races this extent-loading fetch —
+        // pin it explicitly so Home always returns to the loaded extent.
+        const homeEl = mapEl.querySelector("arcgis-home");
+        if (homeEl) homeEl.viewpoint = view.viewpoint.clone();
+
         setStatus("ready");
       } catch (err) {
         if (cancelled) return;

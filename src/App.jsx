@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import "@arcgis/map-components/components/arcgis-map";
+import "@arcgis/map-components/components/arcgis-home";
 import "@arcgis/map-components/components/arcgis-zoom";
 import "@arcgis/map-components/components/arcgis-search";
 import "@arcgis/map-components/components/arcgis-fullscreen";
@@ -71,6 +72,7 @@ export default function App() {
 
       <div className="app__map-container">
         <arcgis-map ref={mapElementRef} basemap="topo-vector">
+          <arcgis-home slot="top-left" />
           <arcgis-zoom slot="top-left" />
           <arcgis-search slot="top-right" />
           <arcgis-fullscreen slot="top-right" />

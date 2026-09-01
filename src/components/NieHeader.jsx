@@ -1,6 +1,6 @@
 import "./NieHeader.css";
 
-export default function NieHeader({ onOpenKey, onOpenFaq }) {
+export default function NieHeader({ onOpenKey, onOpenFaq, filtersVisible, onToggleFilters }) {
   return (
     <header className="nie-header">
       <div className="nie-header__top">
@@ -34,6 +34,14 @@ export default function NieHeader({ onOpenKey, onOpenFaq }) {
       <div className="nie-header__title-bar">
         <h1>Network Capacity Map</h1>
         <div className="nie-header__actions">
+          <button
+            type="button"
+            className={filtersVisible ? "is-active" : ""}
+            aria-pressed={filtersVisible}
+            onClick={onToggleFilters}
+          >
+            Filters
+          </button>
           <button type="button" onClick={onOpenFaq}>
             FAQs
           </button>

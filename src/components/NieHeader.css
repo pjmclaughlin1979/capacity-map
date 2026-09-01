@@ -116,3 +116,8 @@
   text-transform: uppercase;
   cursor: pointer;
 }
+
+.nie-header__actions button.is-active {
+  background: #8dc63f;
+  color: #0c2b4e;
+}
