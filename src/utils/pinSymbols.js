@@ -114,7 +114,7 @@ function cimPointSymbol(markerGraphics, size) {
 export function buildCircleSymbol({ color, size = 14, outlineColor = "#ffffff", label }) {
   const outlineRgba = hexToRgba(outlineColor);
   const graphics = [fillMarkerGraphic(teardropRing(RADIUS), color, outlineRgba)];
-  if (label) graphics.push(textMarkerGraphic(label, RADIUS * 1.1));
+  if (label) graphics.push(textMarkerGraphic(label, RADIUS * 1.1 + 2));
   return cimPointSymbol(graphics, size);
 }
 
@@ -125,6 +125,6 @@ export function buildSplitCircleSymbol({ leftColor, rightColor, size = 16, outli
     fillMarkerGraphic(teardropHalfRing(RADIUS, "right"), rightColor, outlineRgba),
   ];
   // Two-character labels ("BP"/"PP") need a touch more room than one.
-  if (label) graphics.push(textMarkerGraphic(label, RADIUS * (label.length > 1 ? 0.95 : 1.1)));
+  if (label) graphics.push(textMarkerGraphic(label, RADIUS * (label.length > 1 ? 0.95 : 1.1) + 2));
   return cimPointSymbol(graphics, size);
 }
