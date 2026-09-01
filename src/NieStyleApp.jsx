@@ -62,17 +62,19 @@ export default function NieStyleApp() {
         onToggleFilters={() => setFiltersVisible((prev) => !prev)}
       />
 
-      {filtersVisible && (
-        <FilterPanel
-          mode={mode}
-          onModeChange={setMode}
-          substationTypes={substationTypes}
-          onToggleType={toggleType}
-          levels={levels}
-          onToggleLevel={toggleLevel}
-          showActions={false}
-        />
-      )}
+      <div className={`nie-filters-collapse ${filtersVisible ? "" : "nie-filters-collapse--closed"}`}>
+        <div className="nie-filters-collapse__inner">
+          <FilterPanel
+            mode={mode}
+            onModeChange={setMode}
+            substationTypes={substationTypes}
+            onToggleType={toggleType}
+            levels={levels}
+            onToggleLevel={toggleLevel}
+            showActions={false}
+          />
+        </div>
+      </div>
 
       <div className="app__map-container">
         <arcgis-map ref={mapElementRef} basemap="topo-vector">

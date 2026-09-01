@@ -36,6 +36,26 @@ arcgis-map {
   height: 100%;
 }
 
+.nie-filters-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 280ms ease;
+}
+
+.nie-filters-collapse--closed {
+  grid-template-rows: 0fr;
+}
+
+.nie-filters-collapse__inner {
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+.nie-filters-collapse--closed .nie-filters-collapse__inner {
+  opacity: 0;
+}
+
 .app__sample-banner {
   position: absolute;
   bottom: 12px;
